@@ -12,12 +12,10 @@ class Params:
         callback_url: Optional[str] = None,
         callback_method: Optional[str] = None,
         from_: Optional[str] = None,
-        tag: Optional[str] = None,
     ):
         self.callback_url = callback_url
         self.callback_method = callback_method
         self.from_ = from_
-        self.tag = tag
 
 
 class PhoneNumber:
@@ -184,7 +182,6 @@ def make_request_data(
         "callback_url": params.callback_url,
         "callback_method": params.callback_method,
         "from": params.from_,
-        "tag": params.tag,
     }
     if delivery_datetime:
         data["delivery_datetime"] = delivery_datetime
