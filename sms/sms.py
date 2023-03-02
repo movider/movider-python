@@ -3,7 +3,7 @@ from typing import List, Optional
 
 import requests
 
-from client import client
+from client import client as c
 
 
 class Params:
@@ -70,15 +70,32 @@ SMS_SCHEDULE_URI_PATH = "/sms/scheduled"
 class Sms:
     def __init__(self, result: Optional[ResultSms] = None):
         self.result = result
+
     def send(
-        client: client.Client, to: List[str], text: str, params: Optional[Params] = None
-    ):
+            client: c.Client, to: List[str], text: str, params: Optional[Params] = None):
+        """Sends an SMS message to the specified phone numbers.
+
+    :param client: A Client object containing API authentication details.
+    :param to: A list of phone numbers to send the SMS message to.
+    :param text: The text message to be sent.
+    :param params: Optional parameters for the SMS message API (default is None).
+    :raises TypeError: If client parameter is not an instance of Client class.
+    :raises TypeError: If to parameter is not a non-empty list of phone numbers.
+    :raises TypeError: If text parameter is not a string.
+    :raises ValueError: If no phone numbers are specified in the to parameter.
+    :raises ValueError: If no text is specified in the text parameter.
+    :return: A Sms object containing the result of the SMS send request."""
+
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(to, list):
+            raise TypeError("to must be a non-empty list of phone numbers")
+        if not isinstance(text, str):
+            raise TypeError("text must be type of string")
         if len(to) == 0:
             raise ValueError("at least 1 receiver is required.")
-
         if not text:
             raise ValueError("text is required.")
-
         if params is None:
             params = Params()
 
@@ -97,18 +114,34 @@ class Sms:
         result = result_sms_from_json(result)
         return Sms(result=result.__dict__)
 
-    def sendSchedule(
-        client: client.Client, to: List[str], text: str, delivery_datetime: str, params: Optional[Params] = None
-    ):
+    def send_schedule(
+            client: c.Client, to: List[str], text: str, delivery_datetime: str, params: Optional[Params] = None):
+        """Sends an SMS message to the specified phone numbers.
+
+    :param client: A Client object containing API authentication details.
+    :param to: A list of phone numbers to send the SMS message to.
+    :param text: The text message to be sent.
+    :param delivery_datetime: The date and time to send the message and the datetime should be in RFC3339 format.
+    :param params: Optional parameters for the SMS message API (default is None).
+    :raises TypeError: If client parameter is not an instance of Client class.
+    :raises TypeError: If to parameter is not a non-empty list of phone numbers.
+    :raises TypeError: If text or delivery_datetime parameter is not a string.
+    :raises ValueError: If no phone numbers are specified in the to parameter.
+    :raises ValueError: If no text is specified in the text parameter.
+    :return: A Sms object containing the result of the SMS send request."""
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(to, list):
+            raise TypeError("to must be a non-empty list of phone numbers")
+        if not isinstance(text, str) or not isinstance(delivery_datetime, str):
+            raise TypeError(
+                "text and delivery_datetime must be type of string")
         if len(to) == 0:
             raise ValueError("at least 1 receiver is required.")
-
         if not text:
             raise ValueError("text is required.")
-
         if not delivery_datetime:
             raise ValueError("date time is required")
-
         if params is None:
             params = Params()
 
@@ -127,7 +160,19 @@ class Sms:
         result = result_sms_from_json(result)
         return Sms(result=result.__dict__)
 
-    def getScheduled(client: client.Client, schedule_id):
+    def get_scheduled(client: c.Client, schedule_id):
+        """
+        Returns information about a specific scheduled SMS message.
+
+    :param client: A Client object containing API authentication details.
+    :param schedule_id: The ID of the scheduled message to retrieve.
+    :raises TypeError: If client parameter is not an instance of Client class or schedule_id is not a string.
+    :return: A Sms object containing information about the scheduled message."""
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(schedule_id, str):
+            raise TypeError("schedule_id must be type of string")
+
         url = client.endpoint + SMS_SCHEDULE_URI_PATH + "/"+str(schedule_id)
         response = client.get(url, client.content_type_json)
         status_code = response["code"]
@@ -141,7 +186,16 @@ class Sms:
         result = result_schedule_from_json(result)
         return Sms(result=result.__dict__)
 
-    def getAllScheduled(client: client.Client):
+    def get_all_scheduled(client: c.Client):
+        """
+        Returns information about all scheduled SMS message.
+
+    :param client: A Client object containing API authentication details.
+    :raises TypeError: If client parameter is not an instance of Client class.
+    :return: A Sms object containing information about the scheduled messages."""
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+
         url = client.endpoint + SMS_SCHEDULE_URI_PATH
         response = client.get(url, client.content_type_json)
         status_code = response["code"]
@@ -157,8 +211,20 @@ class Sms:
             result_list.append(result_schedule_from_json(item).__dict__)
 
         return Sms(result=result_list)
-    
-    def delScheduled(client: client.Client,schedule_id):
+
+    def del_scheduled(client: c.Client, schedule_id):
+        """
+       Delete a specific scheduled SMS message.
+
+    :param client: A Client object containing API authentication details.
+    :param schedule_id: The ID of the scheduled message to delete.
+    :raises TypeError: If client parameter is not an instance of Client class or schedule_id is not a string.
+    :return: A result message."""
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(schedule_id, str):
+            raise TypeError("schedule_id must be type of string")
+
         url = client.endpoint + SMS_SCHEDULE_URI_PATH + "/"+str(schedule_id)
         response = client.get(url, client.content_type_json)
         status_code = response["code"]
@@ -172,7 +238,7 @@ class Sms:
 
 
 def make_request_data(
-    client: client.Client, to: List[str], text: str, delivery_datetime: Optional[str] = None, params: Optional[Params] = None
+    client: c.Client, to: List[str], text: str, delivery_datetime: Optional[str] = None, params: Optional[Params] = None
 ) -> dict:
     data = {
         "api_key": client.api_key,

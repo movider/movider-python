@@ -1,5 +1,5 @@
 import json
-from client import client
+from client import client as c
 from typing import List, Optional
 import requests
 
@@ -39,13 +39,32 @@ class Params:
 
 class Verify:
     def __init__(self, result: Optional[ResultVerify] = None):
+        """
+        Initializes a new instance of the Verify class.
+
+        :param result: Optional ResultVerify object containing verification request information.
+        """
         self.result = result
     def send(
-        client: client.Client, to: List[str], params: Optional[Params] = None
-    ):
+        client: c.Client, to: List[str], params: Optional[Params] = None):
+        
+        """
+        Sends a verification request to one or more phone numbers.
+
+        :param client: A Client object containing API authentication details.
+        :param to: A list of phone numbers to which the verification code will be sent.
+        :param params: Optional Params object containing additional verification request parameters.
+        :raises TypeError: If client parameter is not an instance of Client class or if to parameter is not a list.
+        :raises ValueError: If to parameter is an empty list.
+        :return: A Verify object containing the result of the verification request.
+        """
+        
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(to, list):
+            raise TypeError("to must be a non-empty list of phone numbers")
         if len(to) == 0:
             raise ValueError("at least 1 receiver is required.")
-
         if params is None:
             params = Params()
 
@@ -68,7 +87,7 @@ class Verify:
         return Verify(result=result.__dict__)
 
 
-def make_send_request_data(client: client.Client, to: List[str], params: Optional[Params] = None) -> dict:
+def make_send_request_data(client: c.Client, to: List[str], params: Optional[Params] = None) -> dict:
     data = {"api_key": client.api_key,
             "api_secret": client.api_secret, 'to':  ",".join(to)}
     if params is not None:
@@ -89,11 +108,30 @@ def make_send_request_data(client: client.Client, to: List[str], params: Optiona
 
 class VerifyAcknowledge:
     def __init__(self, result: Optional[ResultAcknowledge] = None):
+        """
+        Initializes a new instance of the VerifyAcknowledge class.
+
+        :param result: Optional ResultAcknowledge object containing acknowledge information.
+        """
         self.result = result
 
-    def send(client: client.Client, requested_id, code):
-        if not (requested_id or code):
-            raise ValueError("input error.")
+    def send(client: c.Client, requested_id : str, code : str):
+        """
+        Verify the code entered by the user for the given request ID.
+
+        :param client: A Client object containing API authentication details.
+        :param requested_id: A string containing the ID of the request to be acknowledged.
+        :param code: A string containing the code to be verified.
+        :raises TypeError: If client parameter is not an instance of Client class or if requested_id or code is not a string.
+        :raises ValueError: If requested_id or code is empty.
+        :return: A VerifyAcknowledge object containing the acknowledge information.
+        """
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(requested_id, str) or not isinstance(code, str):
+            raise TypeError("requested_id and code must be of type string")
+        if not (requested_id and code):
+            raise ValueError("requested_id and code cannot be empty.")
 
         data = make_acknowledge_request_data(
             request_id=requested_id, code=code)
@@ -115,7 +153,7 @@ class VerifyAcknowledge:
         return VerifyAcknowledge(result=result.__dict__)
 
 
-def make_acknowledge_request_data(client:client.Client,request_id: str, code: str) -> dict:
+def make_acknowledge_request_data(client:c.Client,request_id: str, code: str) -> dict:
     return {"api_key": client.api_key,
             "api_secret": client.api_secret,
             'request_id': request_id, 'code': code}
@@ -123,11 +161,30 @@ def make_acknowledge_request_data(client:client.Client,request_id: str, code: st
 
 class VerifyCancel:
     def __init__(self, result: Optional[ResultCancel] = None):
+        """
+        Initializes a new instance of the VerifyCancel class.
+
+        :param result: Optional ResultCancel object containing cancelation information.
+        """
         self.result = result
 
-    def send(client: client.Client, requested_id):
+    def send(client: c.Client, requested_id):
+        """
+        Sends a cancelation request for a specific verification request.
+
+        :param client: A Client object containing API authentication details.
+        :param requested_id: A string containing the ID of the verification request to be cancelled.
+        :raises TypeError: If client parameter is not an instance of Client class, or if requested_id is not a string.
+        :raises ValueError: If requested_id is an empty string.
+        :return: A VerifyCancel object containing the results of the cancelation request.
+        """
+        if not isinstance(client, c.Client):
+            raise TypeError("client must be an instance of Client")
+        if not isinstance(requested_id,str):
+            raise TypeError("requested_id must be of type string")
         if not requested_id:
-            raise ValueError("input error")
+            raise ValueError("requested_id cannot be empty")
+        
         data = {"api_key": client.api_key,
                 "api_secret": client.api_secret, "request_id": requested_id}
 
