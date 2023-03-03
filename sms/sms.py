@@ -1,6 +1,6 @@
 import json
 from typing import List, Optional
-
+import validation as v
 import requests
 
 from client import client as c
@@ -86,16 +86,8 @@ class Sms:
     :raises ValueError: If no text is specified in the text parameter.
     :return: A Sms object containing the result of the SMS send request."""
 
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-        if not isinstance(to, list):
-            raise TypeError("to must be a non-empty list of phone numbers")
-        if not isinstance(text, str):
-            raise TypeError("text must be type of string")
-        if len(to) == 0:
-            raise ValueError("at least 1 receiver is required.")
-        if not text:
-            raise ValueError("text is required.")
+        v.validate([client,to,text],[c.Client,list,str],["client","to","text"])
+        v.validate_list(to,str,"to")
         if params is None:
             params = Params()
 
@@ -129,19 +121,9 @@ class Sms:
     :raises ValueError: If no phone numbers are specified in the to parameter.
     :raises ValueError: If no text is specified in the text parameter.
     :return: A Sms object containing the result of the SMS send request."""
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-        if not isinstance(to, list):
-            raise TypeError("to must be a non-empty list of phone numbers")
-        if not isinstance(text, str) or not isinstance(delivery_datetime, str):
-            raise TypeError(
-                "text and delivery_datetime must be type of string")
-        if len(to) == 0:
-            raise ValueError("at least 1 receiver is required.")
-        if not text:
-            raise ValueError("text is required.")
-        if not delivery_datetime:
-            raise ValueError("date time is required")
+        v.validate([client,to,text,delivery_datetime],[c.Client,list,str,str],["client","to","text","delivery_datetime"])
+        v.validate_list(to,str,"to")
+
         if params is None:
             params = Params()
 
@@ -168,11 +150,7 @@ class Sms:
     :param schedule_id: The ID of the scheduled message to retrieve.
     :raises TypeError: If client parameter is not an instance of Client class or schedule_id is not a string.
     :return: A Sms object containing information about the scheduled message."""
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-        if not isinstance(schedule_id, str):
-            raise TypeError("schedule_id must be type of string")
-
+        v.validate([client,schedule_id],[c.Client,str],["client","schedule_id"])
         url = client.endpoint + SMS_SCHEDULE_URI_PATH + "/"+str(schedule_id)
         response = client.get(url, client.content_type_json)
         status_code = response["code"]
@@ -193,9 +171,7 @@ class Sms:
     :param client: A Client object containing API authentication details.
     :raises TypeError: If client parameter is not an instance of Client class.
     :return: A Sms object containing information about the scheduled messages."""
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-
+        v.validate([client],[c.Client],["client"])
         url = client.endpoint + SMS_SCHEDULE_URI_PATH
         response = client.get(url, client.content_type_json)
         status_code = response["code"]
@@ -224,7 +200,7 @@ class Sms:
             raise TypeError("client must be an instance of Client")
         if not isinstance(schedule_id, str):
             raise TypeError("schedule_id must be type of string")
-
+        v.validate([client,schedule_id],[c.Client,str],["client","schedule_id"])
         url = client.endpoint + SMS_SCHEDULE_URI_PATH + "/"+str(schedule_id)
         response = client.get(url, client.content_type_json)
         status_code = response["code"]
@@ -270,7 +246,7 @@ def result_sms_from_json(data: dict) -> ResultSms:
         phone_number_list=phone_number_list,
         bad_phone_number_list=bad_phone_number_list,
     )
-    if data["scheduleId"]:
+    if "scheduleId" in data:
         result_sms.scheduled_id = data["scheduleId"]
 
     return result_sms

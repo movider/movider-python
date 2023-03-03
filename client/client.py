@@ -1,7 +1,5 @@
 import json
 import requests
-# Endpoint points you to Movider REST API.
-
 
 # ExpectTimeout is used to limit http.Client waiting time.
 expect_timeout = 15

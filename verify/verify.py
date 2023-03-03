@@ -1,6 +1,7 @@
 import json
 from client import client as c
 from typing import List, Optional
+import validation as v
 import requests
 
 verifyURIPath = "/verify"
@@ -59,12 +60,8 @@ class Verify:
         :return: A Verify object containing the result of the verification request.
         """
         
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-        if not isinstance(to, list):
-            raise TypeError("to must be a non-empty list of phone numbers")
-        if len(to) == 0:
-            raise ValueError("at least 1 receiver is required.")
+        v.validate([client,to],[c.Client,list],["client","to"])
+        v.validate_list(to,str,"to")
         if params is None:
             params = Params()
 
@@ -126,14 +123,8 @@ class VerifyAcknowledge:
         :raises ValueError: If requested_id or code is empty.
         :return: A VerifyAcknowledge object containing the acknowledge information.
         """
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-        if not isinstance(requested_id, str) or not isinstance(code, str):
-            raise TypeError("requested_id and code must be of type string")
-        if not (requested_id and code):
-            raise ValueError("requested_id and code cannot be empty.")
-
-        data = make_acknowledge_request_data(
+        v.validate([client,requested_id,code],[c.Client,str,str],["client","requested_id","code"])
+        data = make_acknowledge_request_data(client,
             request_id=requested_id, code=code)
 
         url = client.endpoint + verifyACKURIPath
@@ -178,13 +169,7 @@ class VerifyCancel:
         :raises ValueError: If requested_id is an empty string.
         :return: A VerifyCancel object containing the results of the cancelation request.
         """
-        if not isinstance(client, c.Client):
-            raise TypeError("client must be an instance of Client")
-        if not isinstance(requested_id,str):
-            raise TypeError("requested_id must be of type string")
-        if not requested_id:
-            raise ValueError("requested_id cannot be empty")
-        
+        v.validate([client,requested_id],[c.Client,str],["client","requested_id"])
         data = {"api_key": client.api_key,
                 "api_secret": client.api_secret, "request_id": requested_id}
 
