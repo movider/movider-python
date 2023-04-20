@@ -74,4 +74,4 @@ Complete documentation, instructions, and examples are available at [https://mov
 
 ## License
 
-Movider client library for Go is licensed under [The MIT License](./LICENSE). Copyright (c) 2019 1Moby Co.,Ltd
+Movider client library for Python is licensed under [The MIT License](./LICENSE). Copyright (c) 2019 1Moby Co.,Ltd
