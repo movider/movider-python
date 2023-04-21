@@ -17,7 +17,7 @@ Python need to be installed
 Using pip to install package in your projects
 
 ```bash
-  pip install git+https://github.com/movider/mvd-sdk-python
+  pip install git+https://github.com/movider/movider-python
 ```
 
 ## Usage/Examples
